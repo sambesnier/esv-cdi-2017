@@ -1,6 +1,10 @@
 <?php
 
 namespace AppBundle\Repository;
+use AppBundle\Entity\Payment;
+use AppBundle\Entity\User;
+use Doctrine\ORM\Tools\Pagination\Paginator;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * PaymentRepository
@@ -10,7 +14,7 @@ namespace AppBundle\Repository;
  */
 class PaymentRepository extends \Doctrine\ORM\EntityRepository
 {
-    public function getAllPayments()
+    public function getAllPayments($page = 1)
     {
         $qb = $this->createQueryBuilder('payment')
             ->innerJoin('payment.user', 'user')
@@ -19,6 +23,67 @@ class PaymentRepository extends \Doctrine\ORM\EntityRepository
 
         $query = $qb->getQuery();
 
-        return $query->getResult();
+        $maxResults = 15;
+
+        $firstResult = ($page - 1) * $maxResults;
+        $query->setFirstResult($firstResult)->setMaxResults($maxResults);
+
+        $paginator = new Paginator($query);
+
+        if (($paginator->count() <= $firstResult) && $page != 1) {
+            throw new NotFoundHttpException("La page demandée n'existe pas");
+        }
+
+        return $paginator;
+    }
+
+    public function getPaymentsByUser(User $user, $page = 1)
+    {
+        $qb = $this->createQueryBuilder('payment')
+            ->innerJoin('payment.user', 'user')
+            ->select(['payment'])
+            ->where('user.id = :id')
+            ->setParameter('id', $user->getId())
+            ->orderBy('payment.paymentDate', 'desc');
+
+        $query = $qb->getQuery();
+
+        $maxResults = 15;
+
+        $firstResult = ($page - 1) * $maxResults;
+        $query->setFirstResult($firstResult)->setMaxResults($maxResults);
+
+        $paginator = new Paginator($query);
+
+        if (($paginator->count() <= $firstResult) && $page != 1) {
+            throw new NotFoundHttpException("La page demandée n'existe pas");
+        }
+
+        return $paginator;
+    }
+
+    public function getPaymentsByNature(Payment $payment, $page = 1)
+    {
+        $qb = $this->createQueryBuilder('payment')
+            ->innerJoin('payment.user', 'user')
+            ->select(['payment'])
+            ->where('payment.nature = :nature')
+            ->setParameter('nature', $payment->getNature())
+            ->orderBy('payment.paymentDate', 'desc');
+
+        $query = $qb->getQuery();
+
+        $maxResults = 15;
+
+        $firstResult = ($page - 1) * $maxResults;
+        $query->setFirstResult($firstResult)->setMaxResults($maxResults);
+
+        $paginator = new Paginator($query);
+
+        if (($paginator->count() <= $firstResult) && $page != 1) {
+            throw new NotFoundHttpException("La page demandée n'existe pas");
+        }
+
+        return $paginator;
     }
 }

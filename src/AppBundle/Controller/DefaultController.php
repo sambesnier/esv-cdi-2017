@@ -19,11 +19,11 @@ use Symfony\Component\Serializer\Serializer;
 class DefaultController extends Controller
 {
     /**
-     * @Route("/", name="homepage")
+     * @Route("/{page}", name="homepage")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request, $page =1)
     {
         $defaultData = array('message' => 'Formulaire d\'importation');
 
@@ -55,12 +55,79 @@ class DefaultController extends Controller
         }
 
         $payments = $this->getDoctrine()->getRepository('AppBundle:Payment')
-            ->getAllPayments();
+            ->getAllPayments($page);
+
+        $pagination = array(
+            'page' => $page,
+            'nbPages' => ceil(count($payments) / 15),
+            'routeName' => 'homepage',
+            'paramsRoute' => array()
+        );
 
         // replace this example code with whatever you need
         return $this->render('AppBundle:Default:index.html.twig', [
             "fileForm" => $form->createView(),
-            "payments" => $payments ?? []
+            "payments" => $payments ?? [],
+            "pagination" => $pagination
+        ]);
+    }
+
+    /**
+     * @Route(
+     *     "/payments/{id}/{page}",
+     *     name="payments_by_id"
+     * )
+     * @param User $user
+     * @param int $page
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @internal param $id
+     */
+    public function paymentsByUserAction(User $user, $page = 1)
+    {
+        $payments = $this->getDoctrine()->getRepository('AppBundle:Payment')
+            ->getPaymentsByUser($user, $page);
+
+        $pagination = array(
+            'page' => $page,
+            'nbPages' => ceil(count($payments) / 15),
+            'routeName' => 'payments_by_id',
+            'id' => $user->getId(),
+            'paramsRoute' => array()
+        );
+
+        // replace this example code with whatever you need
+        return $this->render('AppBundle:Default:index.html.twig', [
+            "payments" => $payments ?? [],
+            "pagination" => $pagination
+        ]);
+    }
+
+    /**
+     * @Route(
+     *     "/payments-by-nature/{id}/{page}",
+     *     name="payments_by_nature"
+     * )
+     * @param Payment $payment
+     * @param int $page
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function paymentsByNatureAction(Payment $payment, $page = 1)
+    {
+        $payments = $this->getDoctrine()->getRepository('AppBundle:Payment')
+            ->getPaymentsByNature($payment, $page);
+
+        $pagination = array(
+            'page' => $page,
+            'nbPages' => ceil(count($payments) / 15),
+            'routeName' => 'payments_by_nature',
+            'id' => $payment->getId(),
+            'paramsRoute' => array()
+        );
+
+        // replace this example code with whatever you need
+        return $this->render('AppBundle:Default:index.html.twig', [
+            "payments" => $payments ?? [],
+            "pagination" => $pagination
         ]);
     }
 

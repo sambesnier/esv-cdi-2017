@@ -24,9 +24,10 @@ ESV 2017
                 </tr>
                 {% for payment in payments %}
                     <tr>
-                        <td>{{ payment.user.name }}</td>
-                        <td>{{ payment.user.firstname }}</td>
-                        <td>{{ payment.user.email }}</td>
+
+                        <td><a href="{{ path('payments_by_id', {'id': payment.user.id, 'page': 1}) }}">{{ payment.user.name }}</a></td>
+                        <td><a href="{{ path('payments_by_id', {'id': payment.user.id, 'page': 1}) }}">{{ payment.user.firstname }}</a></td>
+                        <td><a href="{{ path('payments_by_id', {'id': payment.user.id, 'page': 1}) }}">{{ payment.user.email }}</a></td>
                         {% if payment.user.address is not null %}
                             <td>{{ payment.user.address.address }}</td>
                             <td>{{ payment.user.address.postcode }}</td>
@@ -38,10 +39,26 @@ ESV 2017
                         {% endif %}
                         <td>{{ payment.paymentDate | date('d/m/Y') }}</td>
                         <td>{{ payment.amount }}</td>
-                        <td>{{ payment.nature }}</td>
+                        <td><a href="{{ path('payments_by_nature', {'id': payment.id, 'page': 1}) }}">{{ payment.nature }}</a></td>
                     </tr>
                 {% endfor %}
             </table>
+        </div>
+
+        <div class="pagination">
+            {% if pagination.nbPages > 0 %}
+                {% for p in range(max(pagination.page-4, 1), min(pagination.page+4, pagination.nbPages)) %}
+                    <li {% if p == pagination.page %}class="active"{% endif %}>
+                        {% if pagination.id is defined %}
+                            <a href="{{ path(pagination.routeName, pagination.paramsRoute|merge({'page': p, 'id': pagination.id})) }}">
+                        {% else %}
+                            <a href="{{ path(pagination.routeName, pagination.paramsRoute|merge({'page': p})) }}">
+                        {% endif %}
+                            {{ p }}
+                        </a>
+                    </li>
+                {% endfor %}
+            {% endif %}
         </div>
     {% endif %}
 
@@ -49,8 +66,11 @@ ESV 2017
 
 {% block aside %}
 
+    {% if fileForm is defined %}
     <h1>Importation des données</h1>
 
     {{ form(fileForm) }}
+
+    {% endif %}
 
 {% endblock%}
