@@ -33,9 +33,9 @@ ESV 2017
                             <td>{{ payment.user.address.postcode }}</td>
                             <td>{{ payment.user.address.city }}</td>
                         {% else %}
-                            <td>NC</td>
-                            <td>NC</td>
-                            <td>NC</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
                         {% endif %}
                         <td><a href="{{ path('payments_by_date', {'id': payment.id, 'page': 1}) }}">{{ payment.paymentDate | date('d/m/Y') }}</a></td>
                         <td>{{ payment.amount }}</td>
