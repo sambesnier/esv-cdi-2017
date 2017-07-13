@@ -10,4 +10,15 @@ namespace AppBundle\Repository;
  */
 class PaymentRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function getAllPayments()
+    {
+        $qb = $this->createQueryBuilder('payment')
+            ->innerJoin('payment.user', 'user')
+            ->select(['payment'])
+            ->orderBy('payment.paymentDate', 'desc');
+
+        $query = $qb->getQuery();
+
+        return $query->getResult();
+    }
 }
