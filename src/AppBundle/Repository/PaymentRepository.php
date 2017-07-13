@@ -86,4 +86,29 @@ class PaymentRepository extends \Doctrine\ORM\EntityRepository
 
         return $paginator;
     }
+
+    public function getPaymentsByPaymentDate(Payment $payment, $page = 1)
+    {
+        $qb = $this->createQueryBuilder('payment')
+            ->innerJoin('payment.user', 'user')
+            ->select(['payment'])
+            ->where('payment.paymentDate = :date')
+            ->setParameter('date', $payment->getPaymentDate())
+            ->orderBy('payment.paymentDate', 'desc');
+
+        $query = $qb->getQuery();
+
+        $maxResults = 15;
+
+        $firstResult = ($page - 1) * $maxResults;
+        $query->setFirstResult($firstResult)->setMaxResults($maxResults);
+
+        $paginator = new Paginator($query);
+
+        if (($paginator->count() <= $firstResult) && $page != 1) {
+            throw new NotFoundHttpException("La page demandée n'existe pas");
+        }
+
+        return $paginator;
+    }
 }

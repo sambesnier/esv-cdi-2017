@@ -132,6 +132,35 @@ class DefaultController extends Controller
     }
 
     /**
+     * @Route(
+     *     "/payments-by-date/{id}/{page}",
+     *     name="payments_by_date"
+     * )
+     * @param Payment $payment
+     * @param int $page
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function paymentsByDateAction(Payment $payment, $page = 1)
+    {
+        $payments = $this->getDoctrine()->getRepository('AppBundle:Payment')
+            ->getPaymentsByPaymentDate($payment, $page);
+
+        $pagination = array(
+            'page' => $page,
+            'nbPages' => ceil(count($payments) / 15),
+            'routeName' => 'payments_by_date',
+            'id' => $payment->getId(),
+            'paramsRoute' => array()
+        );
+
+        // replace this example code with whatever you need
+        return $this->render('AppBundle:Default:index.html.twig', [
+            "payments" => $payments ?? [],
+            "pagination" => $pagination
+        ]);
+    }
+
+    /**
      * Store the CSV content in database
      *
      * @param $fileToCsv
