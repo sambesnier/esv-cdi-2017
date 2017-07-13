@@ -5,6 +5,8 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Address;
 use AppBundle\Entity\Payment;
 use AppBundle\Entity\User;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\ORM\ORMException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -93,28 +95,43 @@ class DefaultController extends Controller
                 }
                 if (preg_match($pattern, $columns[6])) {
                     $payment = new Payment();
-                    $paymentDate = \DateTime::createFromFormat('d/m/Y', $columns[6]);
+
+                    $date = $this->convertDate($columns[6]);
+
                     $payment
-                        ->setPaymentDate($paymentDate)
+                        ->setPaymentDate(new \DateTime($date))
                         ->setAmount($columns[7])
                         ->setNature($columns[8])
                         ->setUser($user);
                     $user->addPayment($payment);
                 } else {
                     $payment = new Payment();
-                    $paymentDate = \DateTime::createFromFormat('d/m/Y', $columns[5]);
+
+                    $date = $this->convertDate($columns[5]);
+
                     $payment
-                        ->setPaymentDate($paymentDate)
+                        ->setPaymentDate(new \DateTime($date))
                         ->setAmount($columns[6])
                         ->setNature($columns[7])
                         ->setUser($user);
                     $user->addPayment($payment);
                 }
 
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($user);
-                $em->flush();
+                try {
+                    $em = $this->getDoctrine()->getManager();
+                    $em->persist($user);
+                    $em->flush();
+                } catch (ORMException $e) {
+                } catch (UniqueConstraintViolationException $e) {
+                }
             }
         }
+    }
+
+    private function convertDate($frDate)
+    {
+        $parts = explode('/', $frDate);
+
+        return $parts[2].'-'.$parts[1].'-'.$parts[0];
     }
 }
