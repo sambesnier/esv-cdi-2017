@@ -3,11 +3,53 @@
     <head>
         <meta charset="UTF-8" />
         <title>{% block title %}Welcome!{% endblock %}</title>
-        {% block stylesheets %}{% endblock %}
+        {% block stylesheets %}
+            <link rel="stylesheet" href="{{ asset('dependancies/bootstrap/dist/css/bootstrap.min.css') }}">
+            <link rel="stylesheet" href="{{ asset('dependancies/bootstrap/dist/css/bootstrap-theme.min.css') }}">
+            <link rel="stylesheet" href="{{ asset('public/css/style.css') }}">
+        {% endblock %}
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
     </head>
     <body>
-        {% block body %}{% endblock %}
-        {% block javascripts %}{% endblock %}
+
+        {% block nav %}
+            {% include 'partials/_nav.html.twig' %}
+        {% endblock %}
+
+        <div class="container" id="page">
+            <header>
+                {% block header %}{% endblock %}
+            </header>
+
+            <section class="col-md-8">
+                {% for label, flashes in app.session.flashbag.all %}
+                    {% for flash in flashes %}
+                        <div class="alert alert-{{ label }}">
+                            {{ flash }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                {% block body %}{% endblock %}
+            </section>
+
+            <aside class="col-md-4">
+                {% block aside %}
+
+                {% endblock %}
+            </aside>
+
+        </div>
+
+        <footer>
+            {% block footer %}
+                CopyLeft: Samuel Besnier
+            {% endblock %}
+        </footer>
+
+        {% block javascript %}
+            <script src="{{ asset('dependancies/jquery/dist/jquery.min.js') }}"></script>
+            <script src="{{ asset('dependancies/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+        {% endblock %}
     </body>
 </html>
